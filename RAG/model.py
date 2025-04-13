@@ -1,35 +1,50 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
-model_name = "Qwen/Qwen2.5-0.5B-Instruct"
 
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype="float16",
-    attn_implementation="flash_attention_2",
-    device_map="cuda:1",
-)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+class QwenChatbot:
+    def __init__(
+        self,
+        model_name: str = "Qwen/Qwen2.5-0.5B-Instruct",
+        device: str = "cuda:1",
+        dtype: torch.dtype = torch.float16,
+    ):
+        self.device = device
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype=dtype,
+            attn_implementation="flash_attention_2",
+            device_map=device,
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-prompt = "Give me a short introduction to large language model."
-messages = [
-    {
-        "role": "system",
-        "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.",
-    },
-    {"role": "user", "content": prompt},
-]
-text = tokenizer.apply_chat_template(
-    messages, tokenize=False, add_generation_prompt=True
-)
-model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+    def build_prompt(self, user_input: str, system_prompt: str = None) -> str:
+        if system_prompt is None:
+            system_prompt = (
+                "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
+            )
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input},
+        ]
+        return self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
 
-generated_ids = model.generate(**model_inputs, max_new_tokens=512)
-generated_ids = [
-    output_ids[len(input_ids) :]
-    for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-]
+    def generate(self, user_input: str, max_tokens: int = 512) -> str:
+        prompt = self.build_prompt(user_input)
+        inputs = self.tokenizer([prompt], return_tensors="pt").to(self.model.device)
+        output_ids = self.model.generate(**inputs, max_new_tokens=max_tokens)
 
-response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        # Remove prompt tokens from generated_ids
+        cleaned_ids = [
+            out[len(inp) :] for inp, out in zip(inputs.input_ids, output_ids)
+        ]
+        return self.tokenizer.batch_decode(cleaned_ids, skip_special_tokens=True)[0]
 
-print(f"Response: {response}")
+
+if __name__ == "__main__":
+    bot = QwenChatbot()
+    question = "Give me a short introduction to large language model."
+    answer = bot.generate(question)
+    print(f"Answer: {answer}")
