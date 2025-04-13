@@ -43,7 +43,7 @@ class RAGChatbot:
 if __name__ == "__main__":
     rag_bot = RAGChatbot()
 
-    question = "Why do cats sleep so much?"
+    question = "When was the fist cat show and where it was held ?"
     print("🔍 Query:", question)
     answer = rag_bot.generate_answer(question)
     print("🤖 Answer:", answer)

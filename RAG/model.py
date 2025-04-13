@@ -45,6 +45,6 @@ class QwenChatbot:
 
 if __name__ == "__main__":
     bot = QwenChatbot()
-    question = "Give me a short introduction to large language model."
+    question = "When was the fist cat show and where it was held ?"
     answer = bot.generate(question)
     print(f"Answer: {answer}")
