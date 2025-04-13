@@ -1,7 +1,7 @@
-from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 from model import QwenChatbot
+from sentence_transformers import SentenceTransformer
 
 
 class RAGChatbot:
@@ -11,13 +11,14 @@ class RAGChatbot:
         embed_model: str = "all-MiniLM-L6-v2",
         top_k: int = 3,
     ):
-        self.facts = self.load_facts(facts_file)
+        self.facts = RAGChatbot.load_txt_file(facts_file)
         self.embedder = SentenceTransformer(embed_model)
         self.top_k = top_k
         self.index = self.build_faiss_index(self.facts)
         self.generator = QwenChatbot()
 
-    def load_facts(self, file_path: str):
+    @staticmethod
+    def load_txt_file(file_path: str):
         with open(file_path, "r") as f:
             return [line.strip() for line in f if line.strip()]
 
