@@ -21,6 +21,9 @@ FlashAttention trades a bit more computation for significantly fewer memory acce
 
 ## 2. How It Works
 
+![flash_attn](https://github.com/user-attachments/assets/38a6b37a-8917-41ac-925d-a50222e2ecf8)
+
+
 FlashAttention works by dividing the Query, Key, and Value matrices into blocks and processing them tile by tile. Here's the step-by-step breakdown:
 
 ### Algorithm Overview
