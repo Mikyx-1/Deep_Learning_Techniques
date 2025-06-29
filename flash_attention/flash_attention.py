@@ -33,10 +33,12 @@ def flash_attention(q: torch.Tensor, k: torch.Tensor, v: torch.Tensor):
         v_head = v[:, head_id, :, :]  # [B, N, d]
 
         for j in range(0, seq_len, block_size):
+            # Load k_block, v_block to shared memory (SRAM)
             k_block = k_head[:, j:j + block_size, :]  # [B, Bc, d]
             v_block = v_head[:, j:j + block_size, :]  # [B, Bc, d]
 
             for i in range(0, seq_len, block_size):
+                # Load q_block to shared memory (SRAM)
                 q_block = q_head[:, i:i + block_size, :]  # [B, Br, d]
 
                 attn_scores = torch.einsum('bid,bjd->bij', q_block, k_block)  # [B, Br, Bc]

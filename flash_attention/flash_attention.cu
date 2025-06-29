@@ -1,6 +1,6 @@
 #include <torch/types.h>
 #include <cuda.h>
-#include <cuda_runtime.h>  // you had cuda.h twice, cleaned that up
+#include <cuda_runtime.h>
 
 __global__
 void forward_kernel(const float* Q, const float* K, const float* V, const int N, const int d, 
@@ -129,7 +129,7 @@ torch::Tensor flash_attention(torch::Tensor Q, torch::Tensor K, torch::Tensor V)
     const int sram_size = (3 * Bc * d + Bc * Br) * sizeof(float);
     int max_sram_size;
     cudaDeviceGetAttribute(&max_sram_size, cudaDevAttrMaxSharedMemoryPerBlock, 0);
-    printf("Max shared memory: %d, requested shared memory: %d \n", max_sram_size, sram_size);
+    // printf("Max shared memory: %d, requested shared memory: %d \n", max_sram_size, sram_size);
 
     dim3 grid_dim(B, nh);
     dim3 block_dim(Bc);
